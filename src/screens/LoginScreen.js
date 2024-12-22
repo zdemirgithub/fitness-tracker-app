@@ -1,34 +1,45 @@
-import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Text } from 'react-native';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../services/firebase';
+import React, { useState, useContext } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { AuthContext } from '../context/AuthContext';
 
-const LoginScreen = ({ navigation }) => {
+export default function LoginScreen({ navigation }) {
+  const { login } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = async () => {
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
+  const handleLogin = () => {
+    if (login(email, password)) {
       navigation.navigate('Home');
-    } catch (error) {
-      alert(error.message);
+    } else {
+      Alert.alert('Login Failed', 'Invalid credentials');
     }
   };
 
   return (
     <View style={styles.container}>
-      <TextInput placeholder="Email" value={email} onChangeText={setEmail} style={styles.input} />
-      <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} />
+      <Text style={styles.header}>Login</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
       <Button title="Login" onPress={handleLogin} />
-      <Text onPress={() => navigation.navigate('Register')}>Don't have an account? Register</Text>
+      <Button title="Register" onPress={() => navigation.navigate('Register')} />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', padding: 20 },
-  input: { height: 40, borderWidth: 1, marginBottom: 12, padding: 10, borderRadius: 5 },
+  header: { fontSize: 24, marginBottom: 20 },
+  input: { borderWidth: 1, marginBottom: 15, padding: 10 },
 });
 
-export default LoginScreen;
