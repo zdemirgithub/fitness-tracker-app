@@ -1,34 +1,41 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, Button, FlatList } from 'react-native';
-import { collection, getDocs } from 'firebase/firestore';
-import { auth, db } from '../services/firebase';
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, StyleSheet, Button } from 'react-native';
+import { getAIRecommendations } from '../services/aiRecommendationService';
+import { fetchWorkouts } from '../services/workoutService';
 
-const HomeScreen = ({ navigation }) => {
-  const [workouts, setWorkouts] = useState([]);
+export default function HomeScreen({ navigation }) {
+  const [recommendations, setRecommendations] = useState([]);
 
   useEffect(() => {
-    const fetchWorkouts = async () => {
-      const querySnapshot = await getDocs(collection(db, 'workouts'));
-      const workoutData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setWorkouts(workoutData);
-    };
-    fetchWorkouts();
+    const userPreferences = { difficulty: 'Medium' }; // Mock user preferences
+    const aiRecs = getAIRecommendations(userPreferences);
+    setRecommendations(aiRecs);
   }, []);
 
   return (
-    <View>
+    <View style={styles.container}>
+      <Text style={styles.header}>AI-Recommended Workouts</Text>
       <FlatList
-        data={workouts}
-        keyExtractor={(item) => item.id}
+        data={recommendations}
         renderItem={({ item }) => (
-          <View>
-            <Text>{item.name}</Text>
-            <Button title="View" onPress={() => navigation.navigate('WorkoutDetail', { workout: item })} />
+          <View style={styles.item}>
+            <Text>{item.title}</Text>
+            <Text>Duration: {item.duration}</Text>
+            <Button
+              title="View Details"
+              onPress={() => navigation.navigate('WorkoutDetail', { workout: item })}
+            />
           </View>
         )}
+        keyExtractor={(item) => item.id}
       />
     </View>
   );
-};
+}
 
-export default HomeScreen;
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 20 },
+  header: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
+  item: { marginBottom: 15, padding: 10, borderWidth: 1, borderRadius: 5 },
+});
+
