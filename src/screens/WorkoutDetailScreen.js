@@ -1,16 +1,26 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Button, StyleSheet } from 'react-native';
+import { markWorkoutComplete } from '../services/workoutService';
 
-const WorkoutDetailScreen = ({ route }) => {
+export default function WorkoutDetailScreen({ route, navigation }) {
   const { workout } = route.params;
 
+  const handleComplete = () => {
+    markWorkoutComplete(workout.id);
+    navigation.goBack();
+  };
+
   return (
-    <View>
-      <Text>Workout Name: {workout.name}</Text>
-      <Text>Duration: {workout.duration} mins</Text>
-      <Text>Calories Burned: {workout.calories}</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>{workout.title}</Text>
+      <Text>Duration: {workout.duration}</Text>
+      <Text>Difficulty: {workout.difficulty || 'Not specified'}</Text>
+      <Button title="Mark as Complete" onPress={handleComplete} />
     </View>
   );
-};
+}
 
-export default WorkoutDetailScreen;
+const styles = StyleSheet.create({
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
+});
